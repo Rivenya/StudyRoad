@@ -60,11 +60,19 @@ function BinarySortTree() {
         }
         let tree = new Tree(tmp.node)
         tree.leftChildNode = root.leftChildNode
-        tree.rightChildNode = root.rightChildNode
-        root.leftChildNode.parentNode = tree
-        root.rightChildNode.parentNode = tree
-        link_parent(root.parentNode, root, tree)
-        return deleteValue(root.rightChildNode, tmp.node)
+        if (!root.parent) {
+          tree.rightChildNode = root.rightChildNode.rightChildNode
+          tree.parentNode = null
+          this.root = tree
+          this.root.leftChildNode.parentNode = tree
+          return true
+        } else {
+          tree.rightChildNode = root.rightChildNode
+          root.leftChildNode.parentNode = tree
+          root.rightChildNode.parentNode = tree
+          link_parent(root.parentNode, root, tree)
+          return deleteValue(root.rightChildNode, tmp.node)
+        }
       } else {
         let parents = root.parentNode
         if (root.rightChildNode) {
@@ -76,13 +84,6 @@ function BinarySortTree() {
         }
         return true
       }
-    }
-  }
-  deleteValueDetail = (root, params) => {
-    if (root.parentNode.leftChildNode === params) {
-      root.parentNode.leftChildNode = root.leftChildNode
-    } else {
-      root.parentNode.rightChildNode = root.leftChildNode
     }
   }
   // 插入方法
