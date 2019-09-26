@@ -75,14 +75,19 @@ function BinarySortTree() {
         }
       } else {
         let parents = root.parentNode
-        if (root.rightChildNode) {
-          link_parent(parents, root, root.rightChildNode)
-        } else if (root.leftChildNode) {
-          link_parent(parents, root, root.leftChildNode)
+        if (parents === null) {
+          this.root.leftChildNode.parentNode = null
+          this.root = this.root.leftChildNode
         } else {
-          link_parent(parents, root, null)
+          if (root.rightChildNode) {
+            link_parent(parents, root, root.rightChildNode)
+          } else if (root.leftChildNode) {
+            link_parent(parents, root, root.leftChildNode)
+          } else {
+            link_parent(parents, root, null)
+          }
+          return true
         }
-        return true
       }
     }
   }
