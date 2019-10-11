@@ -36,10 +36,23 @@ function Graph () {
       }
     }
   }
-  function graph_bfs (num, path, array) {
-    path.push(num)
+  function graph_bfs (num, path, array, list) {
+    console.log(num)
+    if (array[num] === 0) {
+      path.push(num)
+      list.push(num)
+      array[num] = 1
+    }
     for (let i = 0; i < map[num].length; i++) {
-      array.push()
+      if (map[num][i] !== 0 && map[num][i] !== '#' && array[i] === 0) {
+        array[i] = 1
+        path.push(i)
+        list.push(i)
+      }
+    }
+    if (path.length < map.length) {
+      list.shift()
+      graph_bfs(list[0], path, array, list)
     }
   }
   this.dfs = function (i) {
@@ -53,11 +66,13 @@ function Graph () {
   }
   this.bfs = function (i) {
     let path = []
+    let list = []
     let array = new Array(map.length)
     for (let i = 0; i < array.length; i++) {
       array[i] = 0
     }
-    graph_bfs(i, path, array)
+    graph_bfs(i, path, array, list)
+    return path
   }
 }
 
@@ -73,4 +88,4 @@ var test_data = [
 
 var z = new Graph()
 z.init(test_data)
-console.log(z.dfs(0))
+console.log(z.bfs(0))
