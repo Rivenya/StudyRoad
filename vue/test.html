@@ -1,32 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <script src="./vue实现.js"></script>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
-</head>
-<script src="./vue实现.js"></script>
-
-<body>
-
-</body>
-<script>
-  const option = {
-    data: {
-      title: "我爱你中国",
-      pepole: [
-        { name: "张三", age: 16 },
-        { name: "李四", age: 22 },
-      ]
+  <body>
+    <div id="app">
+      <div>{{ title }}</div>
+      <div>{{ pepole.name }}</div>
+      <div>{{ pepole.age }}</div>
+      <div w-text="pepole.sex"></div>
+      <input type="text" w-model="title" /></br>
+      <button @click="changTitle">Click</button>
+    </div>
+  </body>
+  <script>
+    const option = {
+      el: '#app',
+      data: {
+        title: '我爱你中国',
+        pepole: {
+          name: '小红',
+          age: '18',
+          sex: '女'
+        }
+      },
+      created() {
+        setTimeout(() => {
+          console.log('开始更新')
+          this.data.pepole.age = 99
+          this.data.title = '我爱你小红'
+        }, 3000)
+      },
+      methods: {
+        changTitle() {
+          this.data.title = '他-改变了世界'
+        }
+      }
     }
-  }
-  const wVue = new WVue(option)
-
-  option.data.title = "我爱你美女"
-  option.data.pepole[0].name = "王二麻子"
-  option.data.pepole[1].name = "王三麻子"
-</script>
-
+    const wVue = new WVue(option)
+  </script>
 </html>
