@@ -120,7 +120,7 @@ class compile {
     const undateFn = this[dir + 'Updater']
     const value = this.getData(exp)
     //初始化
-    undateFn && undateFn(node, value)
+    undateFn && (node, value)
     //依赖收集
     new Watch(vm, this, exp, function(newValue) {
       undateFn && undateFn(node, newValue)
