@@ -1,28 +1,31 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import React, { useState } from 'react'
+import { View, Text, ScrollView } from 'react-native'
 
-import Icon, { IconMap } from '@~/scf-ui/icon/icon';
-import Style from './tree-select.style';
+import Icon, { IconMap } from '@~/scf-ui/icon/icon'
+import Style from './tree-select.style'
 
-interface DataParams {
-  id: string;
-  name: string;
-  parentId?: string;
-  children?: DataParams[];
+export interface DataParams {
+  id: string
+  name: string
+  parentId?: string
+  children?: DataParams[]
 }
-interface TreeSelectProps {
-  mode?: 'asyncData';
-  itemRender?: (id: string) => Promise<DataParams[]>;
-  data: DataParams;
-  callback: (item: DataParams) => void;
+export interface TreeSelectProps {
+  data: DataParams
+  title: string
+  mode?: 'asyncData'
+  itemRender?: (id: string) => Promise<DataParams[]>
+  callback: (item: DataParams) => void
+  close: () => void
 }
+
 const TreeSelect: React.FC<TreeSelectProps> = (props: TreeSelectProps) => {
   /**头部导航堆 */
-  const [headerHeap, useHeaderHeap] = useState([props.data]);
+  const [headerHeap, useHeaderHeap] = useState([props.data])
   /**展示列表 */
-  const [showHeap, useshowrHeap] = useState(props.data.children);
+  const [showHeap, useshowrHeap] = useState(props.data.children)
   /**当前被选key */
-  const [selectKey, useSelectKey] = useState('0');
+  const [selectKey, useSelectKey] = useState(props.data.id)
 
   /**
    * @method 寻找对象
@@ -31,20 +34,20 @@ const TreeSelect: React.FC<TreeSelectProps> = (props: TreeSelectProps) => {
    * @returns {(DataParams | boolean)} 返回目标对象或者false
    */
   const findObj = (target: DataParams, id: string): DataParams | boolean => {
-    let index = 0;
+    let index = 0
     while (target.children && target.children.length > index) {
       if (target.children[index].id === id) {
-        return target.children[index];
+        return target.children[index]
       } else if (target.children[index].children) {
-        const result = findObj(target.children[index], id);
+        const result = findObj(target.children[index], id)
         if (result) {
-          return result;
+          return result
         }
       }
-      index++;
+      index++
     }
-    return false;
-  };
+    return false
+  }
 
   /**
    *
@@ -54,21 +57,25 @@ const TreeSelect: React.FC<TreeSelectProps> = (props: TreeSelectProps) => {
    * @param {('id' | 'parentId')} name 目标的对象的匹配对象
    * @returns {number}  -1表示不存在
    */
-  const isExist = (target: DataParams[], id: string, name: 'id' | 'parentId'): number => {
-    let tmp = -1;
+  const isExist = (
+    target: DataParams[],
+    id: string,
+    name: 'id' | 'parentId'
+  ): number => {
+    let tmp = -1
     target.forEach((item: DataParams, index) => {
       if (item[name] === id) {
-        tmp = index;
+        tmp = index
       }
-    });
-    return tmp;
-  };
+    })
+    return tmp
+  }
 
   /**头部点击事件 */
   const _onHeaderPress = (item: DataParams) => {
-    useSelectKey(item.id);
-    useshowrHeap(item.children);
-  };
+    useSelectKey(item.id)
+    useshowrHeap(item.children)
+  }
 
   /**展开列表事件 */
   const _onShowPress = (item: DataParams) => {
@@ -76,51 +83,53 @@ const TreeSelect: React.FC<TreeSelectProps> = (props: TreeSelectProps) => {
       props.itemRender &&
         props.itemRender(item.id).then((res: string | DataParams[]) => {
           if (typeof res === 'string') {
-            props.callback(item);
+            props.callback(item)
           } else if (typeof res === 'object') {
             try {
-              const obj = findObj(props.data, item.id) as DataParams;
-              obj.children = res;
-              const tmp = [...headerHeap, obj];
-              useSelectKey(item.id);
-              useHeaderHeap(tmp);
-              useshowrHeap(obj.children);
+              const obj = findObj(props.data, item.id) as DataParams
+              obj.children = res
+              const tmp = [...headerHeap, obj]
+              useSelectKey(item.id)
+              useHeaderHeap(tmp)
+              useshowrHeap(obj.children)
             } catch (error) {
-              console.log(error);
+              console.log(error)
             }
           }
-        });
+        })
     } else {
-      useSelectKey(item.id);
-      const obj = findObj(props.data, item.id) as DataParams;
+      useSelectKey(item.id)
+      const obj = findObj(props.data, item.id) as DataParams
       try {
         if (obj.children) {
-          const parentId = obj.parentId as string;
-          const parentIndex = isExist(headerHeap, parentId, 'parentId');
+          const parentId = obj.parentId as string
+          const parentIndex = isExist(headerHeap, parentId, 'parentId')
           if (parentIndex >= 0) {
-            const tmp = JSON.parse(JSON.stringify(headerHeap));
-            tmp.length = parentIndex;
-            tmp.push(obj);
-            useHeaderHeap(tmp);
+            const tmp = JSON.parse(JSON.stringify(headerHeap))
+            tmp.length = parentIndex
+            tmp.push(obj)
+            useHeaderHeap(tmp)
           } else {
-            const tmp = [...headerHeap, obj];
-            useHeaderHeap(tmp);
+            const tmp = [...headerHeap, obj]
+            useHeaderHeap(tmp)
           }
-          useshowrHeap(obj.children);
+          useshowrHeap(obj.children)
         } else {
-          props.callback(item);
+          props.callback(item)
         }
       } catch (error) {
-        console.log(error);
+        console.log(error)
       }
     }
-  };
+  }
 
   return (
     <View style={Style.container}>
       <View style={Style.titleContainer}>
-        <Text style={Style.titleText}>请选择所在地区</Text>
-        <Icon style={Style.titleIcon} icon={IconMap.close} size={20}></Icon>
+        <Text style={Style.titleText}>{props.title}</Text>
+        <Text onPress={props.close}>
+          <Icon style={Style.titleIcon} icon={IconMap.close} size={20}></Icon>
+        </Text>
       </View>
 
       {/* 头部 */}
@@ -129,9 +138,13 @@ const TreeSelect: React.FC<TreeSelectProps> = (props: TreeSelectProps) => {
           headerHeap.map((item: DataParams) => (
             <Text
               key={item.id}
-              style={item.id === selectKey ? Style.headerTextSelect : Style.headerText}
+              style={
+                item.id === selectKey
+                  ? Style.headerTextSelect
+                  : Style.headerText
+              }
               onPress={() => {
-                _onHeaderPress(item);
+                _onHeaderPress(item)
               }}
             >
               {item.name}
@@ -156,7 +169,7 @@ const TreeSelect: React.FC<TreeSelectProps> = (props: TreeSelectProps) => {
               )}
               <Text
                 onPress={() => {
-                  _onShowPress(item);
+                  _onShowPress(item)
                 }}
               >
                 {item.name}
@@ -165,6 +178,6 @@ const TreeSelect: React.FC<TreeSelectProps> = (props: TreeSelectProps) => {
           ))}
       </ScrollView>
     </View>
-  );
-};
-export default TreeSelect;
+  )
+}
+export default TreeSelect
