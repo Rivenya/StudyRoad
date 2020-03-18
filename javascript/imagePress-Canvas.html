@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h2>上传图片</h2>
+    <input
+      type="file"
+      id="file"
+      accept="image/*"
+      onchange="handleChange({ quality: 0.5, width: 300 })"
+    />
+
+    <h2>未压缩图片</h2>
+    <img id="img" /><img />
+
+    <h2>压缩后的图片</h2>
+    <img id="img2" /><img />
+  </body>
+  <script>
+    /**
+     * @method input的change事件
+     */
+    function handleChange(params) {
+      const file = document.getElementById('file').files[0]
+      //输出文件大小
+      console.log(file.size)
+      // 创建读取文件对象
+      const fileReader = new FileReader()
+      fileReader.readAsDataURL(file)
+      // 把读取到的file对象转为base64
+      fileReader.onloadend = e => {
+        file.base64Url = e.target.result
+        document.getElementById('img').src = file.base64Url
+        imgCompress(file, params).then(res => {
+          //这里就是压缩完的file对象，上传到服务器即可
+          // console.log(res)
+          //压缩后的文件大小
+          console.log(res.size)
+          //压缩后显示图片
+          document.getElementById('img2').src = res.base64Url
+        })
+      }
+    }
+    /**
+     *
+     * @method 图片压缩
+     * @param {file对象} file
+     * @param {压缩对象参数} params {width:压缩后的宽度,quality:压缩的比例}
+     *
+     */
+    function imgCompress(file, params = {}) {
+      console.log(params)
+      return new Promise(resolve => {
+        const img = new Image()
+        img.src = file.base64Url
+        img.onload = () => {
+          //计算长宽
+          const scale = img.width / img.height
+          const w = params.width || img.width
+          const h = params.width ? img.height : w / scale
+          const quality = params.quality || 0.8
+          //创建canvas
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d')
+          //设置属性
+          canvas.setAttribute('width', w.toString())
+          canvas.setAttribute('height', h.toString())
+          ctx.drawImage(img, 0, 0, w, h)
+          //压缩图片
+          const base64 = canvas.toDataURL(file.type, quality)
+          //base64转Blob,生成file（避免ios不兼容）
+          const arr = base64.split(',')
+          const blobMine = arr[0].match(/:(.*?);/)[1]
+          //解码base64
+          const bstr = atob(arr[1])
+          let n = bstr.length
+          const u8arr = new Uint8Array(n)
+          while (n--) {
+            //编码
+            u8arr[n] = bstr.charCodeAt(n)
+          }
+          //生成file
+          const blob = new Blob([u8arr], { type: blobMine })
+          blob.lastModifiedDate = new Date()
+          blob.name = file.name
+          blob.base64Url = file.base64Url
+          resolve(blob)
+        }
+      })
+    }
+  </script>
+</html>
